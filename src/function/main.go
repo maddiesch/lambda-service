@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -15,6 +16,10 @@ type Event struct {
 
 func main() {
 	lambda.Start(func(ctx context.Context, event Event) {
-		log.Println(event.Greeting, event.Name)
+		log.Println(greeting(event))
 	})
+}
+
+func greeting(event Event) string {
+	return fmt.Sprintf("%s %s!", event.Greeting, event.Name)
 }

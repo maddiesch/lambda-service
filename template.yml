@@ -12,4 +12,4 @@ Resources:
       CodeUri: build/
       Handler: function
       Policies:
-        - AWSLambdaExecute
+        - AWSLambdaBasicExecutionRole

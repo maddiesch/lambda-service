@@ -17,6 +17,8 @@ WATCH_COMAND := rerun --no-notify --pattern '*.go' -x
 
 include $(ROOT_DIR)/.make-config
 
+export AWS_PROFILE = $(AWS_SAM_PROFILE)
+
 AWS_SAM_PACKAGE_FILE := $(ROOT_DIR)/package.yml
 AWS_SAM_TEMPLATE_FILE := $(ROOT_DIR)/template.yml
 
@@ -42,11 +44,11 @@ invoke: clean build
 
 .PHONY: package
 package: build
-	sam package --template-file $(AWS_SAM_TEMPLATE_FILE) --output-template-file $(AWS_SAM_PACKAGE_FILE) --s3-bucket ${AWS_SAM_PACKAGE_BUCKET} --profile ${AWS_SAM_PROFILE}
+	sam package --template-file $(AWS_SAM_TEMPLATE_FILE) --output-template-file $(AWS_SAM_PACKAGE_FILE) --s3-bucket ${AWS_SAM_PACKAGE_BUCKET}
 
 .PHONY: deploy
 deploy: package
-	aws cloudformation deploy --template-file $(AWS_SAM_PACKAGE_FILE) --stack-name $(AWS_CLOUDFORMATION_STACK_NAME) --capabilities CAPABILITY_IAM  --profile ${AWS_SAM_PROFILE}
+	aws cloudformation deploy --template-file $(AWS_SAM_PACKAGE_FILE) --stack-name $(AWS_CLOUDFORMATION_STACK_NAME) --capabilities CAPABILITY_IAM
 
 .PHONY: watch
 watch:

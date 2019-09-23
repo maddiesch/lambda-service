@@ -22,25 +22,41 @@ export AWS_PROFILE = $(AWS_SAM_PROFILE)
 AWS_SAM_PACKAGE_FILE := $(ROOT_DIR)/package.yml
 AWS_SAM_TEMPLATE_FILE := $(ROOT_DIR)/template.yml
 
+define create-build-target
+build-$1:
+	cd ${SRC_DIR}/functions/$1 && ${GO_LAMBDA_ENV} go build -o ${BUILD_DIR}/$1.lambda
+endef
+
+define create-test-target
+test-$1:
+	cd ${SRC_DIR}/$1 && go test -v ./...
+endef
+
+$(foreach binary,${BINARIES},$(eval $(call create-build-target,${binary})))
+
+$(foreach folder,${GO_TESTS},$(eval $(call create-test-target,${folder})))
+
+###
+##
+###
+
 .PHONY: all
 all: clean test build
 
 .PHONY: build
-build:
-	cd $(SRC_DIR)/function && $(GO_LAMBDA_ENV) go build -o $(BUILD_DIR)/function .
+build: $(addprefix build-, $(BINARIES))
 
 .PHONY: test
-test:
-	cd $(SRC_DIR)/function && go test -v ./...
+test: $(addprefix test-, $(GO_TESTS))
 
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-	-rm $(AWS_SAM_PACKAGE_FILE)
+	-rm $(AWS_SAM_PACKAGE_FILE) >& /dev/null || true
 
 .PHONY: invoke
 invoke: clean build
-	sam local invoke FunctionHandler --event $(ROOT_DIR)/events/function.json
+	sam local invoke FunctionHandler --env-vars $(ROOT_DIR)/env.json --event $(ROOT_DIR)/events/function.json
 
 .PHONY: package
 package: build

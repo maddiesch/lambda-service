@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
 // Event is the payload sent to lambda
 type Event struct {
-	Greeting string `json:"greeting"`
-	Name     string `json:"name"`
+	Name string `json:"name"`
 }
 
 func main() {
@@ -21,5 +21,5 @@ func main() {
 }
 
 func greeting(event Event) string {
-	return fmt.Sprintf("%s %s!", event.Greeting, event.Name)
+	return fmt.Sprintf("%s %s!", os.Getenv("GREETING"), event.Name)
 }

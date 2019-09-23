@@ -4,12 +4,15 @@ Globals:
   Function:
     Runtime: go1.x
     Timeout: 10
-    MemorySize: 128
+    MemorySize: 256
 Resources:
   FunctionHandler:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: build/
-      Handler: function
+      Handler: function-handler.lambda
+      Environment:
+        Variables:
+          GREETING: Hello
       Policies:
         - AWSLambdaBasicExecutionRole

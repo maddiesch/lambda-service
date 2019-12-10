@@ -9,6 +9,12 @@ BUILD_DIR := ${ROOT_DIR}/build
 # The src directory is where your source code lives
 SRC_DIR := ${ROOT_DIR}/src
 
+# Executable code directory
+CMD_DIR := ${SRC_DIR}/cmd
+
+# Supporting packages code directory
+PKG_DIR := ${SRC_DIR}/pkg
+
 # This is the environment for a lambda binary
 GO_LAMBDA_ENV := GOOS=linux GOARCH=amd64
 
@@ -17,14 +23,14 @@ WATCH_COMAND := rerun --no-notify --pattern '*.go' -x
 
 include $(ROOT_DIR)/.make-config
 
-export AWS_PROFILE = $(AWS_SAM_PROFILE)
+export AWS_PROFILE ?= $(AWS_SAM_PROFILE)
 
 AWS_SAM_PACKAGE_FILE := $(ROOT_DIR)/package.yml
 AWS_SAM_TEMPLATE_FILE := $(ROOT_DIR)/template.yml
 
 define create-build-target
 build-$1:
-	cd ${SRC_DIR}/functions/$1 && ${GO_LAMBDA_ENV} go build -o ${BUILD_DIR}/$1.lambda
+	cd ${CMD_DIR}/$1 && ${GO_LAMBDA_ENV} go build -o ${BUILD_DIR}/$1.lambda
 endef
 
 define create-test-target
@@ -33,8 +39,6 @@ test-$1:
 endef
 
 $(foreach binary,${BINARIES},$(eval $(call create-build-target,${binary})))
-
-$(foreach folder,${GO_TESTS},$(eval $(call create-test-target,${folder})))
 
 ###
 ##
@@ -47,7 +51,8 @@ all: clean test build
 build: $(addprefix build-, $(BINARIES))
 
 .PHONY: test
-test: $(addprefix test-, $(GO_TESTS))
+test:
+	cd ${SRC_DIR} && go test -v ./...
 
 .PHONY: clean
 clean:
